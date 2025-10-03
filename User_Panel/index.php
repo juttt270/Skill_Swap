@@ -1,269 +1,214 @@
+<?php
 
-<!-- Sale & Revenue Start -->
-<div class="container-fluid pt-4 px-4">
-    <div class="row g-4">
-        <div class="col-sm-6 col-xl-3">
-            <div class="bg-light rounded d-flex align-items-center justify-content-between p-4">
-                <i class="fa fa-chart-line fa-3x text-primary"></i>
-                <div class="ms-3">
-                    <p class="mb-2">Today Sale</p>
-                    <h6 class="mb-0">$1234</h6>
+// ---------- KPIs ----------
+$user_id = $_SESSION['user_id']; // (yeh login user ka ID hoga, baad me $_SESSION se lena)
+
+// Count user skills
+$total_skills = mysqli_fetch_assoc(mysqli_query($connection, "SELECT COUNT(*) as c FROM user_skills WHERE user_id=$user_id"))['c'];
+
+// Requests sent
+$sent = mysqli_fetch_assoc(mysqli_query($connection, "SELECT COUNT(*) as c FROM requests WHERE requester_id=$user_id"))['c'];
+
+// Requests received
+$received = mysqli_fetch_assoc(mysqli_query($connection, "SELECT COUNT(*) as c FROM requests WHERE provider_id=$user_id"))['c'];
+
+// Completed swaps count
+$completed_q = mysqli_query($connection, "
+    SELECT COUNT(*) as c 
+    FROM swaps s
+    JOIN requests r ON s.request_id = r.id
+    WHERE (r.requester_id = $user_id OR r.provider_id = $user_id) 
+      AND s.status = 'completed'
+");
+$completed = mysqli_fetch_assoc($completed_q)['c'];
+
+// Fetch recent skills
+$skills_q = mysqli_query($connection, "SELECT us.id, s.name, s.category, us.level 
+                                      FROM user_skills us 
+                                      JOIN skills s ON us.skill_id=s.id 
+                                      WHERE us.user_id=$user_id LIMIT 5");
+
+// Fetch recent requests
+$completed_swaps = mysqli_query($connection, "
+  SELECT s.id as swap_id, 
+       u1.username AS requester_name, 
+       u2.username AS provider_name, 
+       sk.name AS skill_name,
+       s.started_at, 
+       s.finished_at,
+       s.status
+FROM swaps s
+JOIN requests r ON s.request_id = r.id
+JOIN registers u1 ON r.requester_id = u1.id
+JOIN registers u2 ON r.provider_id = u2.id
+JOIN skills sk ON r.skill_id = sk.id
+WHERE s.status !=' '
+ORDER BY s.finished_at ASC limit 5
+");
+
+?>
+
+<div class="container-fluid p-4">
+
+    <!-- KPI CARDS -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h5>My Skills</h5>
+                    <h3><?= $total_skills ?></h3>
                 </div>
             </div>
         </div>
-        <div class="col-sm-6 col-xl-3">
-            <div class="bg-light rounded d-flex align-items-center justify-content-between p-4">
-                <i class="fa fa-chart-bar fa-3x text-primary"></i>
-                <div class="ms-3">
-                    <p class="mb-2">Total Sale</p>
-                    <h6 class="mb-0">$1234</h6>
+        <div class="col-md-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h5>Requests Sent</h5>
+                    <h3><?= $sent ?></h3>
                 </div>
             </div>
         </div>
-        <div class="col-sm-6 col-xl-3">
-            <div class="bg-light rounded d-flex align-items-center justify-content-between p-4">
-                <i class="fa fa-chart-area fa-3x text-primary"></i>
-                <div class="ms-3">
-                    <p class="mb-2">Today Revenue</p>
-                    <h6 class="mb-0">$1234</h6>
+        <div class="col-md-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h5>Requests Received</h5>
+                    <h3><?= $received ?></h3>
                 </div>
             </div>
         </div>
-        <div class="col-sm-6 col-xl-3">
-            <div class="bg-light rounded d-flex align-items-center justify-content-between p-4">
-                <i class="fa fa-chart-pie fa-3x text-primary"></i>
-                <div class="ms-3">
-                    <p class="mb-2">Total Revenue</p>
-                    <h6 class="mb-0">$1234</h6>
+        <div class="col-md-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h5>Completed Swaps</h5>
+                    <h3><?= $completed ?></h3>
                 </div>
             </div>
         </div>
     </div>
-</div>
-<!-- Sale & Revenue End -->
 
-
-<!-- Sales Chart Start -->
-<div class="container-fluid pt-4 px-4">
-    <div class="row g-4">
-        <div class="col-sm-12 col-xl-6">
-            <div class="bg-light text-center rounded p-4">
-                <div class="d-flex align-items-center justify-content-between mb-4">
-                    <h6 class="mb-0">Worldwide Sales</h6>
-                    <a href="">Show All</a>
-                </div>
-                <canvas id="worldwide-sales"></canvas>
-            </div>
+    <!-- MY SKILLS TABLE -->
+    <div class="card mb-4">
+        <div class="card-header d-flex justify-content-between">
+            <h5>My Skills</h5>
+            <button class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#addSkillModal">+ Add
+                Skill</button>
         </div>
-        <div class="col-sm-12 col-xl-6">
-            <div class="bg-light text-center rounded p-4">
-                <div class="d-flex align-items-center justify-content-between mb-4">
-                    <h6 class="mb-0">Salse & Revenue</h6>
-                    <a href="">Show All</a>
-                </div>
-                <canvas id="salse-revenue"></canvas>
-            </div>
-        </div>
-    </div>
-</div>
-<!-- Sales Chart End -->
 
-
-<!-- Recent Sales Start -->
-<div class="container-fluid pt-4 px-4">
-    <div class="bg-light text-center rounded p-4">
-        <div class="d-flex align-items-center justify-content-between mb-4">
-            <h6 class="mb-0">Recent Salse</h6>
-            <a href="">Show All</a>
-        </div>
-        <div class="table-responsive">
-            <table class="table text-start align-middle table-bordered table-hover mb-0">
+        <div class="card-body table-responsive">
+            <table class="table table-striped">
                 <thead>
-                    <tr class="text-dark">
-                        <th scope="col"><input class="form-check-input" type="checkbox"></th>
-                        <th scope="col">Date</th>
-                        <th scope="col">Invoice</th>
-                        <th scope="col">Customer</th>
-                        <th scope="col">Amount</th>
-                        <th scope="col">Status</th>
-                        <th scope="col">Action</th>
+                    <tr>
+                        <th>Name</th>
+                        <th>Category</th>
+                        <th>Level</th>
+                        <th>Action</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <tr>
-                        <td><input class="form-check-input" type="checkbox"></td>
-                        <td>01 Jan 2045</td>
-                        <td>INV-0123</td>
-                        <td>Jhon Doe</td>
-                        <td>$123</td>
-                        <td>Paid</td>
-                        <td><a class="btn btn-sm btn-primary" href="">Detail</a></td>
-                    </tr>
-                    <tr>
-                        <td><input class="form-check-input" type="checkbox"></td>
-                        <td>01 Jan 2045</td>
-                        <td>INV-0123</td>
-                        <td>Jhon Doe</td>
-                        <td>$123</td>
-                        <td>Paid</td>
-                        <td><a class="btn btn-sm btn-primary" href="">Detail</a></td>
-                    </tr>
-                    <tr>
-                        <td><input class="form-check-input" type="checkbox"></td>
-                        <td>01 Jan 2045</td>
-                        <td>INV-0123</td>
-                        <td>Jhon Doe</td>
-                        <td>$123</td>
-                        <td>Paid</td>
-                        <td><a class="btn btn-sm btn-primary" href="">Detail</a></td>
-                    </tr>
-                    <tr>
-                        <td><input class="form-check-input" type="checkbox"></td>
-                        <td>01 Jan 2045</td>
-                        <td>INV-0123</td>
-                        <td>Jhon Doe</td>
-                        <td>$123</td>
-                        <td>Paid</td>
-                        <td><a class="btn btn-sm btn-primary" href="">Detail</a></td>
-                    </tr>
-                    <tr>
-                        <td><input class="form-check-input" type="checkbox"></td>
-                        <td>01 Jan 2045</td>
-                        <td>INV-0123</td>
-                        <td>Jhon Doe</td>
-                        <td>$123</td>
-                        <td>Paid</td>
-                        <td><a class="btn btn-sm btn-primary" href="">Detail</a></td>
-                    </tr>
+                    <?php while ($s = mysqli_fetch_assoc($skills_q)) { ?>
+                        <tr>
+                            <td><?= $s['name'] ?></td>
+                            <td><?= $s['category'] ?></td>
+                            <td><?= $s['level'] ?></td>
+                            <td>
+                                <a href="../Skill_Swap/code.php?delete_user_skill=<?= $s['id'] ?>"
+                                    class="btn btn-danger btn-sm" onclick="return confirm('Delete skill?')">Delete</a>
+                            </td>
+                        </tr>
+                    <?php } ?>
                 </tbody>
             </table>
         </div>
     </div>
-</div>
-<!-- Recent Sales End -->
 
 
-<!-- Widgets Start -->
-<div class="container-fluid pt-4 px-4">
-    <div class="row g-4">
-        <div class="col-sm-12 col-md-6 col-xl-4">
-            <div class="h-100 bg-light rounded p-4">
-                <div class="d-flex align-items-center justify-content-between mb-2">
-                    <h6 class="mb-0">Messages</h6>
-                    <a href="">Show All</a>
-                </div>
-                <div class="d-flex align-items-center border-bottom py-3">
-                    <img class="rounded-circle flex-shrink-0" src="img/user.jpg" alt=""
-                        style="width: 40px; height: 40px;">
-                    <div class="w-100 ms-3">
-                        <div class="d-flex w-100 justify-content-between">
-                            <h6 class="mb-0">Jhon Doe</h6>
-                            <small>15 minutes ago</small>
-                        </div>
-                        <span>Short message goes here...</span>
-                    </div>
-                </div>
-                <div class="d-flex align-items-center border-bottom py-3">
-                    <img class="rounded-circle flex-shrink-0" src="img/user.jpg" alt=""
-                        style="width: 40px; height: 40px;">
-                    <div class="w-100 ms-3">
-                        <div class="d-flex w-100 justify-content-between">
-                            <h6 class="mb-0">Jhon Doe</h6>
-                            <small>15 minutes ago</small>
-                        </div>
-                        <span>Short message goes here...</span>
-                    </div>
-                </div>
-                <div class="d-flex align-items-center border-bottom py-3">
-                    <img class="rounded-circle flex-shrink-0" src="img/user.jpg" alt=""
-                        style="width: 40px; height: 40px;">
-                    <div class="w-100 ms-3">
-                        <div class="d-flex w-100 justify-content-between">
-                            <h6 class="mb-0">Jhon Doe</h6>
-                            <small>15 minutes ago</small>
-                        </div>
-                        <span>Short message goes here...</span>
-                    </div>
-                </div>
-                <div class="d-flex align-items-center pt-3">
-                    <img class="rounded-circle flex-shrink-0" src="img/user.jpg" alt=""
-                        style="width: 40px; height: 40px;">
-                    <div class="w-100 ms-3">
-                        <div class="d-flex w-100 justify-content-between">
-                            <h6 class="mb-0">Jhon Doe</h6>
-                            <small>15 minutes ago</small>
-                        </div>
-                        <span>Short message goes here...</span>
-                    </div>
-                </div>
-            </div>
+    <!-- RECENT REQUESTS TABLE -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5>Recent Swap Requests</h5>
         </div>
-        <div class="col-sm-12 col-md-6 col-xl-4">
-            <div class="h-100 bg-light rounded p-4">
-                <div class="d-flex align-items-center justify-content-between mb-4">
-                    <h6 class="mb-0">Calender</h6>
-                    <a href="">Show All</a>
-                </div>
-                <div id="calender"></div>
-            </div>
+        <div class="card-body table-responsive">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Swap No</th>
+                        <th>From</th>
+                        <th>To</th>
+                        <th>Skill</th>
+                        <th>Started at</th>
+                        <th>Completed at</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php
+                    $i = 0;
+                    while ($row = mysqli_fetch_assoc($completed_swaps)) {
+                        $i++;
+                        echo "<tr>
+            <td>
+{$i}
+            </td>
+            <td>{$row['requester_name']}</td>
+            <td>{$row['provider_name']}</td>
+            <td>{$row['skill_name']}</td>
+            <td>{$row['started_at']}</td>
+            <td>{$row['finished_at']}</td>
+          </tr>";
+                    }
+
+                    ?>
+                </tbody>
+            </table>
         </div>
-        <div class="col-sm-12 col-md-6 col-xl-4">
-            <div class="h-100 bg-light rounded p-4">
-                <div class="d-flex align-items-center justify-content-between mb-4">
-                    <h6 class="mb-0">To Do List</h6>
-                    <a href="">Show All</a>
+    </div>
+
+    <!-- Add Skill Modal -->
+    <div class="modal fade" id="addSkillModal">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Add a Skill</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
-                <div class="d-flex mb-2">
-                    <input class="form-control bg-transparent" type="text" placeholder="Enter task">
-                    <button type="button" class="btn btn-primary ms-2">Add</button>
-                </div>
-                <div class="d-flex align-items-center border-bottom py-2">
-                    <input class="form-check-input m-0" type="checkbox">
-                    <div class="w-100 ms-3">
-                        <div class="d-flex w-100 align-items-center justify-content-between">
-                            <span>Short task goes here...</span>
-                            <button class="btn btn-sm"><i class="fa fa-times"></i></button>
+                <div class="modal-body">
+                    <!-- Add from Dropdown -->
+                    <form method="POST">
+                        <div class="mb-3">
+                            <label class="form-label">Select Existing Skill</label>
+                            <select name="skill_id" class="form-control" required>
+                                <option value="">-- Select Skill --</option>
+                                <?php while ($s = mysqli_fetch_assoc($skills)) { ?>
+                                    <option value="<?php echo $s['id']; ?>"><?php echo $s['name']; ?></option>
+                                <?php } ?>
+                            </select>
                         </div>
-                    </div>
-                </div>
-                <div class="d-flex align-items-center border-bottom py-2">
-                    <input class="form-check-input m-0" type="checkbox">
-                    <div class="w-100 ms-3">
-                        <div class="d-flex w-100 align-items-center justify-content-between">
-                            <span>Short task goes here...</span>
-                            <button class="btn btn-sm"><i class="fa fa-times"></i></button>
+                        <div class="mb-3">
+                            <label class="form-label">Skill Level</label>
+                            <select name="level" class="form-control" required>
+                                <option value="">-- Select Level --</option>
+                                <option value="beginner">Beginner</option>
+                                <option value="intermediate">Intermediate</option>
+                                <option value="advanced">Advanced</option>
+                            </select>
                         </div>
-                    </div>
-                </div>
-                <div class="d-flex align-items-center border-bottom py-2">
-                    <input class="form-check-input m-0" type="checkbox" checked>
-                    <div class="w-100 ms-3">
-                        <div class="d-flex w-100 align-items-center justify-content-between">
-                            <span><del>Short task goes here...</del></span>
-                            <button class="btn btn-sm text-primary"><i class="fa fa-times"></i></button>
+                        <button type="submit" name="add_user_skill" class="btn btn-success">Add to My Skills</button>
+                    </form>
+
+                    <hr>
+
+                    <!-- Add New Skill -->
+                    <form method="POST">
+                        <div class="mb-3">
+                            <label class="form-label">Suggest New Skill</label>
+                            <input type="text" name="new_skill" class="form-control" placeholder="Enter skill name"
+                                required>
                         </div>
-                    </div>
-                </div>
-                <div class="d-flex align-items-center border-bottom py-2">
-                    <input class="form-check-input m-0" type="checkbox">
-                    <div class="w-100 ms-3">
-                        <div class="d-flex w-100 align-items-center justify-content-between">
-                            <span>Short task goes here...</span>
-                            <button class="btn btn-sm"><i class="fa fa-times"></i></button>
-                        </div>
-                    </div>
-                </div>
-                <div class="d-flex align-items-center pt-2">
-                    <input class="form-check-input m-0" type="checkbox">
-                    <div class="w-100 ms-3">
-                        <div class="d-flex w-100 align-items-center justify-content-between">
-                            <span>Short task goes here...</span>
-                            <button class="btn btn-sm"><i class="fa fa-times"></i></button>
-                        </div>
-                    </div>
+                        <button type="submit" name="add_new_skill" class="btn btn-warning">Submit for Approval</button>
+                    </form>
                 </div>
             </div>
         </div>
     </div>
+    
+    
 </div>
-<!-- Widgets End -->

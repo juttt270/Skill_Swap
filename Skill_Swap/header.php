@@ -1,7 +1,7 @@
-  <?php
-  include_once 'code.php';
-  ?>
-  <!DOCTYPE html>
+<?php
+include_once 'code.php';
+?>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="utf-8">
@@ -17,7 +17,9 @@
   <!-- Fonts -->
   <link href="https://fonts.googleapis.com" rel="preconnect">
   <link href="https://fonts.gstatic.com" rel="preconnect" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,300;1,400;1,500;1,600;1,700;1,800&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Raleway:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,300;1,400;1,500;1,600;1,700;1,800&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Raleway:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap"
+    rel="stylesheet">
 
   <!-- Vendor CSS Files -->
   <link href="assets/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
@@ -29,13 +31,11 @@
   <!-- Main CSS File -->
   <link href="assets/css/main.css" rel="stylesheet">
 </head>
+
 <body>
   <header id="header" class="header d-flex align-items-center sticky-top">
     <div class="container-fluid container-xl position-relative d-flex align-items-center">
-
       <a href="index.php" class="logo d-flex align-items-center me-auto">
-        <!-- Uncomment the line below if you also wish to use an image logo -->
-        <!-- <img src="assets/img/logo.webp" alt=""> -->
         <h1 class="sitename">SkillSwaps</h1>
       </a>
 
@@ -65,29 +65,33 @@
             </ul>
           </li>
           <li><a href="contact.php">Contact</a></li>
-          <?php if (isset($_SESSION['user_id'])){ ?>
-            <li class="dropdown"><a href="#"><span><?php echo htmlspecialchars($_SESSION['username']); ?></span> <i class="bi bi-chevron-down toggle-dropdown"></i></a>
+          <?php
+          if (isset($_SESSION['user_id'])) {
+            ?>
+            <li class="dropdown"><a href="#"><span><?php echo htmlspecialchars($_SESSION['username']); ?></span> <i
+                  class="bi bi-chevron-down toggle-dropdown"></i></a>
               <ul>
-                <?php if ($_SESSION['role'] === 'admin'){ ?>
+                <?php if ($_SESSION['role'] === 'admin') { ?>
                   <li><a href="../Admin_Panel/public.php?index">Dashboard</a></li>
-                <?php 
-                }
-              else{ ?>
+                  <?php
+                } else { ?>
                   <li><a href="../User_Panel/public.php?index">Dashboard</a></li>
                 <?php } ?>
                 <li><a href="logout.php">Logout</a></li>
               </ul>
             </li>
-          <?php 
-        }
-         else{ ?>
-          <li class="dropdown"><a href="#"><span>Account</span> <i class="bi bi-chevron-down toggle-dropdown"></i></a>
-            <ul>
-              <li><a href="../Admin_Panel/signin.php">Sign In</a></li>
-              <li><a href="../Admin_Panel/signup.php">Sign Up</a></li>
-            </ul>
-          </li>
-          <?php } ?>
+            <?php
+          } else {
+            ?>
+            <li class="dropdown"><a href="#"><span>Account</span> <i class="bi bi-chevron-down toggle-dropdown"></i></a>
+              <ul>
+                <li><a href="../Admin_Panel/signin.php">Sign In</a></li>
+                <li><a href="../Admin_Panel/signup.php">Sign Up</a></li>
+              </ul>
+            </li>
+            <?php
+          }
+          ?>
 
         </ul>
         <i class="mobile-nav-toggle d-xl-none bi bi-list"></i>

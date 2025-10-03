@@ -1,9 +1,12 @@
+<?php
+include_once '../Skill_Swap/code.php';
+?>
 <!DOCTYPE html>
 <html lang="en">
 
 <head>
     <meta charset="utf-8">
-    <title>SKILL_SWAP - Bootstrap Admin Template</title>
+    <title>SKILL_SWAP - Admin Template</title>
     <meta content="width=device-width, initial-scale=1.0" name="viewport">
     <meta content="" name="keywords">
     <meta content="" name="description">
@@ -34,12 +37,12 @@
 <body>
     <div class="container-xxl position-relative bg-white d-flex p-0">
         <!-- Spinner Start -->
-        <div id="spinner"
+        <!-- <div id="spinner"
             class="show bg-white position-fixed translate-middle w-100 vh-100 top-50 start-50 d-flex align-items-center justify-content-center">
             <div class="spinner-border text-primary" style="width: 3rem; height: 3rem;" role="status">
                 <span class="sr-only">Loading...</span>
             </div>
-        </div>
+        </div> -->
         <!-- Spinner End -->
 
 
@@ -62,12 +65,18 @@
                     </div>
                 </div>
                 <div class="navbar-nav w-100">
-                    <a href="public.php?index" class="nav-item nav-link active"><i
-                            class="fa fa-tachometer-alt me-2"></i>Dashboard</a>
-                            
-                    <div class="nav-item dropdown">
-
-                    </div>
+            <a href="public.php?dashboard" class="nav-item nav-link active"><i class="fa fa-tachometer-alt me-2"></i>Dashboard</a>
+            <a href="public.php?users" class="nav-item nav-link"><i class="fa fa-users me-2"></i>Users</a>
+            <a href="public.php?skills" class="nav-item nav-link"><i class="fa fa-lightbulb me-2"></i>Skills</a>
+            <!-- <a href="public.php?requests" class="nav-item nav-link"><i class="fa fa-exchange-alt me-2"></i>Requests</a> -->
+            <a href="public.php?swaps" class="nav-item nav-link"><i class="fa fa-handshake me-2"></i>Swaps/Sessions</a>
+            <a href="public.php?messages" class="nav-item nav-link"><i class="fa fa-envelope me-2"></i>Messages</a>
+            <a href="public.php?payment" class="nav-item nav-link"><i class="fa fa-credit-card me-2"></i>Payment</a>
+            <a href="public.php?feedback" class="nav-item nav-link"><i class="fa fa-star me-2"></i>Feedback</a>
+            <a href="public.php?reports" class="nav-item nav-link"><i class="fa fa-flag me-2"></i>Reports</a>
+            <a href="public.php?announcement" class="nav-item nav-link"><i class="fa fa-bullhorn me-2"></i></i>Announcements</a>
+            <a href="public.php?settings" class="nav-item nav-link"><i class="fa fa-cog me-2"></i>Settings</a>
+            <a href="public.php?logout" class="nav-item nav-link"><i class="fa fa-sign-out-alt me-2"></i>Logout</a>
             </nav>
         </div>
         <!-- Sidebar End -->
@@ -173,6 +182,16 @@
             if (isset($_GET['index'])) {
                 include 'index.php';
             }
+
+            if (isset($_GET['dashboard'])) {
+                include 'dashboard.php';
+            }
+            if (isset($_GET['users'])) {
+                include 'Users.php';
+            }
+            if (isset($_GET['skills'])) {
+                include 'Skills.php';
+            }
             ?>
             <!-- Content End -->
 
@@ -209,7 +228,7 @@
     </div>
 
     <!-- JavaScript Libraries -->
-    <script src="https://code.jquery.com/jquery-3.4.1.min.js"></scrip >
+    <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
             <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="lib/chart/chart.min.js"></script>
     <script src="lib/easing/easing.min.js"></script>
